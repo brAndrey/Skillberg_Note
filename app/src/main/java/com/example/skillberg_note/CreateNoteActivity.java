@@ -36,7 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class CreateNoteActivity<intent> extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>  {
+public class CreateNoteActivity<intent> extends BaseNoteActivity{
 
 
     static String LOG_TAG = CreateNoteActivity.class.getName();
@@ -57,9 +57,9 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
 
     private File currentImageFile;
 
-    // для выбора URI изображения из базы
-private static final int LOADER_NOTE =0;
-    private static final int LOADER_IMAGES =1;
+//    // для выбора URI изображения из базы
+//    private static final int LOADER_NOTE = 0;
+//    private static final int LOADER_IMAGES = 1;
 
 
     @Override
@@ -84,16 +84,10 @@ private static final int LOADER_NOTE =0;
 
 
         if (noteId != -1){
-            // инициализируем лоадер
-            getLoaderManager().initLoader(
-                    LOADER_NOTE,
-                    null,
-                    this);
 
-            getLoaderManager().initLoader(
-                    LOADER_IMAGES,
-                    null,
-                    this);
+initNoteLoader();
+
+initImagesLoader();
 
         }
 
@@ -288,50 +282,51 @@ private static final int LOADER_NOTE =0;
     ;
 
     //**************************************************************************************
+//
+//    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//
+//        if (id == LOADER_NOTE){
+//            return new CursorLoader(
+//                this,
+//                ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
+//                //NotesContract.Notes.URI+"/"+noteId,
+//                NotesContract.Notes.SINGLE_PROJECTION,
+//                null,
+//                null,
+//                null);
+//
+//
+//    } else{
+//            return new CursorLoader(
+//                    this,
+//                    NotesContract.Images.URI,
+//                    NotesContract.Images.PROJECTION,
+//                    NotesContract.Images.COLUMN_NOTE_ID + " =?",
+//                    new String[]{String.valueOf(noteId)},
+//                    null);
+//        }
+//    }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-        if (id == LOADER_NOTE){
-            return new CursorLoader(
-                this,
-                ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
-                //NotesContract.Notes.URI+"/"+noteId,
-                NotesContract.Notes.SINGLE_PROJECTION,
-                null,
-                null,
-                null);
 
 
-    } else{
-            return new CursorLoader(
-                    this,
-                    NotesContract.Images.URI,
-                    NotesContract.Images.PROJECTION,
-                    NotesContract.Images.COLUMN_NOTE_ID + " =?",
-                    new String[]{String.valueOf(noteId)},
-                    null);
-        }
-    }
-
-
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if (loader.getId() == LOADER_NOTE) {
-            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-            displayNote(cursor);
-        } else {
-            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-        }
-    }
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+//        if (loader.getId() == LOADER_NOTE) {
+//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
+//            displayNote(cursor);
+//        } else {
+//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
+//        }
+//    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
 
-    private void displayNote(Cursor cursor) {
+    @Override
+    protected void displayNote(Cursor cursor) {
         if (!cursor.moveToFirst()) {
 // Если не получилось перейти к первой строке — завершаем Activity
             finish();

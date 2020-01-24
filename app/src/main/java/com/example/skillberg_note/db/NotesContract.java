@@ -18,6 +18,14 @@ public class NotesContract {
             Images.CREATE_TABLE
     };
 
+    //lfopd lfopd
+
+    public static abstract class Informs {
+        public static final String tables = ".tables";
+        //.schema
+    }
+
+
     public static abstract class Notes implements BaseColumns {
 
         public static final String TABLE_NAME = "notes";
@@ -93,18 +101,6 @@ public class NotesContract {
                 Notes.TABLE_NAME,
                 Notes._ID);
 
-//        public static final String CREATE_TABLE = String.format("CREATE TABLE %s " +
-//                        "(%s INTEGER PRIMARY KEY, " +
-//                        "%s TEXT NOT NULL, " +
-//                        "%s INTEGER NOT NULL, " +
-//                        "FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE CASCADE);",
-//                TABLE_NAME,
-//                _ID,
-//                COLUMN_PATH,
-//                COLUMN_NOTE_ID,
-//                COLUMN_NOTE_ID,
-//                Notes.TABLE_NAME,
-//                Notes._ID);
 
         public static final String[] PROJECTION = {
                 _ID,

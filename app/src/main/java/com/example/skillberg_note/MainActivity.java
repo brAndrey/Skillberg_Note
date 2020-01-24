@@ -16,6 +16,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.widget.Toolbar;
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
 //        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, layoutManager.getOrientation());
 //        recyclerView.addItemDecoration(dividerItemDecoration);
-        InsertOneRecord insertOneRecord = new InsertOneRecord(this);
+//        InsertOneRecord insertOneRecord = new InsertOneRecord(this);
 
         notesAdapter = new NotesAdapter(null,onNoteClickListener );
         recyclerView.setAdapter(notesAdapter);
@@ -69,13 +71,37 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         });
 
         Log.i(MainActivity.class.getName()," DB_VERSION " + NotesContract.DB_VERSION);
-        Log.i(MainActivity.class.getName()," DB_lenth " + insertOneRecord.lenthSQL());
+ //       Log.i(MainActivity.class.getName()," DB_lenth " + insertOneRecord.lenthSQL());
 
         //findViewById(R.id.notes_rv).setOnClickListener();
 
     }
+//*********************************************************************************************
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.main_note, menu);
+        return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_info:
+                Intent intent = new Intent(MainActivity.this, InfoActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 
+    //**************************************************************************************************
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(

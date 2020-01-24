@@ -24,15 +24,19 @@ public class NotesDBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (oldVersion == 1 && newVersion == 2) {
 
-            sqLiteDatabase.execSQL(NotesContract.Images.CREATE_TABLE);
-//            try {
-//                sqLiteDatabase.execSQL(NotesContract.Images.CREATE_TABLE);
-//            } finally {
-//
-//            }
+            //sqLiteDatabase.execSQL(NotesContract.Images.CREATE_TABLE);
+            try {
+                sqLiteDatabase.execSQL(NotesContract.Images.CREATE_TABLE);
+            } finally {
+
+            }
 //            ;
 
 
         }
     }
+
+//    public String getDatabaseName() {
+//        return null;
+//    }
 }

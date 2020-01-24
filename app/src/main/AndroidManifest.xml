@@ -4,7 +4,7 @@
 
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18"></uses-permission>
+        android:maxSdkVersion="18" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +13,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
+        <activity
+            android:name=".InfoActivity"
+            android:label="@string/title_activity_info"
+            android:theme="@style/AppTheme.NoActionBar.NoActionBar"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,29 +24,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CreateNoteActivity"></activity>
-        <activity android:name=".NoteActivity"></activity>
-        <provider
-            android:authorities="com.skillberg.notes.provider"
-            android:name=".db.NotesProvider"
-            android:exported="false"/>
+        <activity android:name=".CreateNoteActivity" />
+        <activity android:name=".NoteActivity" />
 
+        <provider
+            android:name=".db.NotesProvider"
+            android:authorities="com.skillberg.notes.provider"
+            android:exported="false" />
         <provider
             android:name="androidx.core.content.FileProvider"
-
             android:authorities="com.example.skillberg_note.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-
         </provider>
-<!-- android:name="androidx.core.content.FileProvider"
-android:authorities="com.example.skillberg_note.fileprovider"
--->
     </application>
-
-
 
 </manifest>

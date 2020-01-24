@@ -29,7 +29,6 @@ public class NotesProvider extends ContentProvider {
 
     private static final int IMAGES = 3;
     private static final int IMAGE = 4;
-static {}
 
     //
     private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
@@ -46,6 +45,7 @@ static {}
         notesDBHelper = new NotesDBHelper(getContext());
         return true;
     }
+
 
     @Nullable
     @Override

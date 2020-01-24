@@ -36,10 +36,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class CreateNoteActivity<intent> extends BaseNoteActivity{
+//public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
+public class CreateNoteActivity<intent> extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    static String LOG_TAG = CreateNoteActivity.class.getName();
+        static String LOG_TAG = CreateNoteActivity.class.getName();
 
     public static final String EXTRA_NOTE_ID = "note_id";
 
@@ -58,8 +59,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity{
     private File currentImageFile;
 
 //    // для выбора URI изображения из базы
-//    private static final int LOADER_NOTE = 0;
-//    private static final int LOADER_IMAGES = 1;
+    private static final int LOADER_NOTE = 0;
+    private static final int LOADER_IMAGES = 1;
 
 
     @Override
@@ -73,7 +74,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity{
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         titleEt = findViewById(R.id.title_et);
-        textEt =  findViewById(R.id.text_et);
+        textEt = findViewById(R.id.text_et);
 
         titleTil = findViewById(R.id.title_til);
         textTil = findViewById(R.id.text_til);
@@ -82,16 +83,27 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity{
         noteId = getIntent().getLongExtra(EXTRA_NOTE_ID, -1);
 
 
+        if (noteId != -1) {
 
-        if (noteId != -1){
+            getLoaderManager().initLoader(
+                    LOADER_NOTE, // Идентификатор загрузчика
+                    null, // Аргументы
+                    this // Callback для событий загрузчика
+            );
 
-initNoteLoader();
+            getLoaderManager().initLoader(
+                    LOADER_IMAGES,
+                    null,
+                    this
+            );
 
-initImagesLoader();
+        //    initNoteLoader();
+
+        //    initImagesLoader();
 
         }
 
-        Log.i(" Activity_log ",LOG_TAG);
+        Log.i(" Activity_log ", LOG_TAG);
     }
 
     @Override
@@ -112,9 +124,9 @@ initImagesLoader();
             case android.R.id.home:
                 finish();
                 return true;
-                case R.id.action_attache:
-                    showImageSelectionDialog();
-                    return true;
+            case R.id.action_attache:
+                showImageSelectionDialog();
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -146,22 +158,23 @@ initImagesLoader();
             textTil.setErrorEnabled(false);
         }
 
-        if (isCorrect){
+        if (isCorrect) {
             long currentTime = System.currentTimeMillis();
 
             ContentValues contentValues = new ContentValues();
-            contentValues.put(NotesContract.Notes.COLUMN_TITLE,title);
-            contentValues.put(NotesContract.Notes.COLUMN_NOTE,text);
-            if (noteId == -1){
-                contentValues.put(NotesContract.Notes.COLUMN_CREATED_TS,currentTime);
+            contentValues.put(NotesContract.Notes.COLUMN_TITLE, title);
+            contentValues.put(NotesContract.Notes.COLUMN_NOTE, text);
+
+            if (noteId == -1) {
+                contentValues.put(NotesContract.Notes.COLUMN_CREATED_TS, currentTime);
             }
 
 
-            contentValues.put(NotesContract.Notes.COLUMN_UPDATED_TS,currentTime);
+            contentValues.put(NotesContract.Notes.COLUMN_UPDATED_TS, currentTime);
 
             if (noteId == -1) {
                 getContentResolver().insert(NotesContract.Notes.URI, contentValues);
-            }else {
+            } else {
                 getContentResolver().update(ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),
                         contentValues,
                         null,
@@ -171,45 +184,50 @@ initImagesLoader();
             finish();
         }
     }
-//*******************************************************************
-    private void showImageSelectionDialog(){
+
+    //*******************************************************************
+    private void showImageSelectionDialog() {
         //создаём билдер диалога
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 // Задаём название
                 .setTitle(R.string.title_dialog_attachment_variants)
                 // Задаём список
-                .setItems(R.array.attachment_variants, new DialogInterface.OnClickListener(){
+                .setItems(R.array.attachment_variants, new DialogInterface.OnClickListener() {
 
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == 0) {
-                    pickImageFromGallery();
-                }else if (which == 1){ takePhoto();
-                }
-            }
-        }).create();
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0) {
+                            pickImageFromGallery();
+                        } else if (which == 1) {
+                            takePhoto();
+                        }
+                    }
+                }).create();
 
-        if (!isFinishing()){alertDialog.show();}
+        if (!isFinishing()) {
+            alertDialog.show();
+        }
 
     }
 
-  private void pickImageFromGallery() {
+    private void pickImageFromGallery() {
 
-      Intent intent = new Intent(Intent.ACTION_PICK);
-      intent.setType("image/*");
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
 
-      startActivityForResult(intent,REQUEST_CODE_PICK_FROM_GALLARY);
+        startActivityForResult(intent, REQUEST_CODE_PICK_FROM_GALLARY);
 
 
-  }
-  //lang=java
-    private void takePhoto(){
+    }
+
+    //lang=java
+    private void takePhoto() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         //Создаём файл для изображения
         currentImageFile = createImageFile();
 
-        if (currentImageFile != null){
+        if (currentImageFile != null) {
             //Если файл создался - получаем его URI
             Uri imageUri = FileProvider.getUriForFile(this,
                     "com.example.skillberg_note.fileprovider",
@@ -218,7 +236,7 @@ initImagesLoader();
             //Передаём URI в камеру
             intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 
-            startActivityForResult(intent,REQUEST_CODE_TAKE_PHOTO);
+            startActivityForResult(intent, REQUEST_CODE_TAKE_PHOTO);
         }
 
     }
@@ -227,12 +245,12 @@ initImagesLoader();
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_PICK_FROM_GALLARY && requestCode == RESULT_OK && data != null){
+        if (requestCode == REQUEST_CODE_PICK_FROM_GALLARY && requestCode == RESULT_OK && data != null) {
 
             // ПОлучаем URI изображения
             Uri imageUri = data.getData();
 
-            if (imageUri != null){
+            if (imageUri != null) {
                 try {
                     //ПОлучаем InputStream, из которого будем декодировать Bitmap
                     InputStream inputStream = getContentResolver().openInputStream(imageUri);
@@ -247,14 +265,13 @@ initImagesLoader();
                 }
             }
 
-        }else if (requestCode == REQUEST_CODE_TAKE_PHOTO && requestCode == RESULT_OK){
+        } else if (requestCode == REQUEST_CODE_TAKE_PHOTO && requestCode == RESULT_OK) {
 
             Bitmap bitmap = BitmapFactory.decodeFile(currentImageFile.getAbsolutePath());
             Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
 
         }
     }
-
 
 
     @Nullable
@@ -267,7 +284,7 @@ initImagesLoader();
         // Директория будет создана автоматически, если ещё не существует
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
-// Создаём файл
+        // Создаём файл
         File image = new File(storageDir, filename);
         try {
             if (image.createNewFile()) {
@@ -282,57 +299,57 @@ initImagesLoader();
     ;
 
     //**************************************************************************************
-//
-//    @Override
-//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//
-//        if (id == LOADER_NOTE){
-//            return new CursorLoader(
-//                this,
-//                ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
-//                //NotesContract.Notes.URI+"/"+noteId,
-//                NotesContract.Notes.SINGLE_PROJECTION,
-//                null,
-//                null,
-//                null);
-//
-//
-//    } else{
-//            return new CursorLoader(
-//                    this,
-//                    NotesContract.Images.URI,
-//                    NotesContract.Images.PROJECTION,
-//                    NotesContract.Images.COLUMN_NOTE_ID + " =?",
-//                    new String[]{String.valueOf(noteId)},
-//                    null);
-//        }
-//    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        if (id == LOADER_NOTE){
+            return new CursorLoader(
+                this,
+                ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
+                //NotesContract.Notes.URI+"/"+noteId,
+                NotesContract.Notes.SINGLE_PROJECTION,
+                null,
+                null,
+                null);
 
 
+    } else{
+            return new CursorLoader(
+                    this,
+                    NotesContract.Images.URI,
+                    NotesContract.Images.PROJECTION,
+                    NotesContract.Images.COLUMN_NOTE_ID + " =?",
+                    new String[]{String.valueOf(noteId)},
+                    null);
+        }
+    }
 
-//    @Override
-//    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-//        if (loader.getId() == LOADER_NOTE) {
-//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-//            displayNote(cursor);
-//        } else {
-//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-//        }
-//    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (loader.getId() == LOADER_NOTE) {
+            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
+            displayNote(cursor);
+        } else {
+            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
+        }
+    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
 
-    @Override
+    //@Override
     protected void displayNote(Cursor cursor) {
+
         if (!cursor.moveToFirst()) {
-// Если не получилось перейти к первой строке — завершаем Activity
+             // Если не получилось перейти к первой строке — завершаем Activity
             finish();
         }
 
-        String title    = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Notes.COLUMN_TITLE));
+        String title = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Notes.COLUMN_TITLE));
         String noteText = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Notes.COLUMN_NOTE));
 
         titleEt.setText(title);

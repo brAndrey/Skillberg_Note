@@ -13,25 +13,23 @@ import com.example.skillberg_note.db.NotesContract;
 import com.example.skillberg_note.ui.NoteImagesAdapter;
 
 
-public abstract class BaseNoteActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+public abstract class BaseNoteActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     // для выбора URI изображения из базы
     private static final int LOADER_NOTE = 0;
     private static final int LOADER_IMAGES = 1;
 
-    protected long noteId= -1;
+    protected long noteId = -1;
 
     protected NoteImagesAdapter noteImagesAdapter;
 
 
-
-
     // инициализируем загрузчик заметки
-  protected void initNoteLoader() {
-      getLoaderManager().initLoader(
-              LOADER_NOTE,
-              null,
-              this);
-  }
+    protected void initNoteLoader() {
+        getLoaderManager().initLoader(
+                LOADER_NOTE,
+                null,
+                this);
+    }
 
     // инициализируем загрузчик изображения
     protected void initImagesLoader() {
@@ -44,7 +42,7 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (id == LOADER_NOTE){
+        if (id == LOADER_NOTE) {
             return new CursorLoader(
                     this,
                     ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
@@ -55,7 +53,7 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
                     null);
 
 
-        } else{
+        } else {
             return new CursorLoader(
                     this,
                     NotesContract.Images.URI,
@@ -84,8 +82,10 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
 
     }
 
-    // Отображаем заметку. Этот метод должен быть реализован а Activity
-protected abstract void displayNote(Cursor cursor);
+    // Отображаем заметку. Этот метод должен быть реализован в Activity
+    protected abstract void displayNote(Cursor cursor);
+
+
 }
 
 

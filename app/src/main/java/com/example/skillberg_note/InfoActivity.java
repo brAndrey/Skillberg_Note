@@ -1,7 +1,6 @@
 package com.example.skillberg_note;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
@@ -12,19 +11,24 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.sqlite.db.SupportSQLiteDatabase;
+
 
 import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.List;
+import java.util.ArrayList;
+
 
 public class InfoActivity extends AppCompatActivity {
 
-    private NotesDBHelper notesDBHelper;
+    String LOG_TAG = InfoActivity.class.getName();
 
     private Context context;
+
+//    public InfoActivity(Context context) {
+//        this.context = context;
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,45 +41,38 @@ public class InfoActivity extends AppCompatActivity {
 
         String tebles = String.valueOf(NotesContract.DB_VERSION);
 
-        notesDBHelper = new NotesDBHelper(context);
+        NotesDBHelper  notesDBHelper = new NotesDBHelper(getBaseContext());
 
-        //SQLiteDatabase
-      //  SupportSQLiteDatabase db =
+        SQLiteDatabase db = notesDBHelper.getReadableDatabase();
 
-                //getBaseContext().openOrCreateDatabase(NotesContract.DB_NAME, MODE_PRIVATE, null);
-        //db.execSQL("CREATE TABLE IF NOT EXISTS users (name TEXT, age INTEGER)");
-        //Cursor query = db.rawQuery("SELECT * FROM users;", null);
-//        Cursor query = db.rawQuery("tables", null);
-//        String name = "";
-//
-//
-//        if(query.moveToFirst()){
-//
-//            name = query.getString(0);
-////            int age = query.getInt(1);
-//        }
+        final int version = db.getVersion();
 
-        //SupportSQLiteDatabase
+        tebles = tebles+" -> "+version+"\n";
 
-//        public List<Pair<String, String>> getAttachedDbs() {
-//            return getAttachedDbs(this);
-//        }
+        ArrayList<Pair<String, String>> attachedDbs = new ArrayList<Pair<String, String>>();
 
+        attachedDbs = (ArrayList<Pair<String, String>>) db.getAttachedDbs();//getAttachedDbs();
 
-//        SQLiteDatabase db = notesDBHelper.getReadableDatabase();
-//
-        tebles = tebles ; //NotesContract.Informs.tables;
+        tebles=tebles+String.valueOf(attachedDbs.size()) + "\n";
+
+        for (Pair name: attachedDbs) {
+            tebles=tebles+String.valueOf(name)+"\n";
+            tebles=tebles+String.valueOf(name.first)+"\n";
+            tebles=tebles+String.valueOf(name.second)+"\n";
+
+        }
+
 
         textView.setText(tebles);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//
+//        FloatingActionButton fab = findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
     }
 
 

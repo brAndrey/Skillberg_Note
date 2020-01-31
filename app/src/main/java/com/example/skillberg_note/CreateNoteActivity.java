@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.skillberg_note.R;
+import com.example.skillberg_note.db.DataBaseOperation;
 import com.example.skillberg_note.db.NotesContract;
 import com.example.skillberg_note.file.FileStream;
 import com.example.skillberg_note.ui.NoteImagesAdapter;
@@ -55,9 +57,9 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
         static String LOG_TAG = CreateNoteActivity.class.getName();
 
+        private Context context;
+
     public static final String EXTRA_NOTE_ID = "note_id";
-
-
 
     private TextInputEditText titleEt;
     private TextInputEditText textEt;
@@ -100,24 +102,11 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
         noteImagesAdapter = new NoteImagesAdapter(null);
         recyclerView.setAdapter(noteImagesAdapter);
 
-
         // считываем входящий параметр ID корректируемой строки , если он пуст то -1
         noteId = getIntent().getLongExtra(EXTRA_NOTE_ID, -1);
 
 
         if (noteId != -1) {
-
-//            getLoaderManager().initLoader(
-//                    LOADER_NOTE, // Идентификатор загрузчика
-//                    null, // Аргументы
-//                    this // Callback для событий загрузчика
-//            );
-//
-//            getLoaderManager().initLoader(
-//                    LOADER_IMAGES,
-//                    null,
-//                    this
-//            );
 
             initNoteLoader();
 
@@ -125,7 +114,6 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
         }
 
-        Log.i(" Activity_log ", LOG_TAG);
     }
 
     @Override
@@ -268,10 +256,9 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.i(LOG_TAG +" onActivityResult ", "requestCode "+String.valueOf(requestCode));
-        Log.i(LOG_TAG +" onActivityResult ", "resultCode "+String.valueOf(resultCode));
-        Log.i(LOG_TAG +" onActivityResult ", "data "+String.valueOf(data));
-
+//        Log.i(LOG_TAG +" onActivityResult ", "requestCode "+String.valueOf(requestCode));
+//        Log.i(LOG_TAG +" onActivityResult ", "resultCode "+String.valueOf(resultCode));
+//        Log.i(LOG_TAG +" onActivityResult ", "data "+String.valueOf(data));
 
         if (requestCode == REQUEST_CODE_PICK_FROM_GALLARY
                 && resultCode == RESULT_OK
@@ -289,16 +276,18 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
                     Log.i(LOG_TAG +" onActivityResult" ,"inputStream "+inputStream );
                     //Декодируем Bitmap
-                    final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                  //  final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
                     File imageFile = createImageFile();
 
+                    // уходим в отдельный класс работы с файлами
                     FileStream fileStream =new FileStream();
                     fileStream.writeInputStreamToFile(inputStream,imageFile,imageUri);
 
+                    //DataBaseOperation dataBaseOperation = new DataBaseOperation(context);
                     addImageToDatebase(imageFile);
 
-                    Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+                 //   Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
 
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -317,11 +306,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
         }
     }
 
-
-
-
-// метод записи в базу
-    private void addImageToDatebase(File file){
+    // метод записи в базу
+    public void addImageToDatebase(File file){
         if (noteId == -1){
             // На данный момент мы добавляем аттачи только в режиме редактирования
             return;
@@ -359,50 +345,6 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
         return null;
     }
 
-    ;
-
-    //**************************************************************************************
-//
-//    @Override
-//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//
-//        if (id == LOADER_NOTE){
-//            return new CursorLoader(
-//                this,
-//                ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
-//                //NotesContract.Notes.URI+"/"+noteId,
-//                NotesContract.Notes.SINGLE_PROJECTION,
-//                null,
-//                null,
-//                null);
-//
-//
-//    } else{
-//            return new CursorLoader(
-//                    this,
-//                    NotesContract.Images.URI,
-//                    NotesContract.Images.PROJECTION,
-//                    NotesContract.Images.COLUMN_NOTE_ID + " =?",
-//                    new String[]{String.valueOf(noteId)},
-//                    null);
-//        }
-//    }
-//
-//
-//    @Override
-//    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-//        if (loader.getId() == LOADER_NOTE) {
-//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-//            displayNote(cursor);
-//        } else {
-//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-//        }
-//    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
 
     //@Override
     protected void displayNote(Cursor cursor) {

@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.skillberg_note.R;
 import com.example.skillberg_note.db.NotesContract;
+import com.example.skillberg_note.file.FileStream;
 import com.example.skillberg_note.ui.NoteImagesAdapter;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -292,7 +293,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
                     File imageFile = createImageFile();
 
-                    writeInputStreamToFile(inputStream,imageFile,imageUri);
+                    FileStream fileStream =new FileStream();
+                    fileStream.writeInputStreamToFile(inputStream,imageFile,imageUri);
 
                     addImageToDatebase(imageFile);
 
@@ -316,76 +318,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
     }
 
 
-    private void writeInputStreamToFile(InputStream inputStream, File outFile,Uri imageUri) throws IOException {
-        /*
-         *  нам нужно скопировать изображение к себе. Для этого нам понадобится следующий метод:
-         */
-        String text = "Hello World";
 
-        FileOutputStream fileOutputStream = new FileOutputStream(outFile);
-
-        Log.i(LOG_TAG, "outFile.getName()" + outFile.getName());
-        Log.i(LOG_TAG, "outFile.getAbsolutePath() " + outFile.getAbsolutePath());
-
-        byte[] buffer = new byte[8192];
-        int n = 0;
-
-        Log.i(LOG_TAG, "inputStream " + inputStream);
-        Log.i(LOG_TAG, "inputStream.available() " + inputStream.available());
-        Log.i(LOG_TAG, " buffer.length " + buffer.length);
-
-        //http://developer.alexanderklimov.ru/android/java/inputstream.php
-//
-//        while ((n = inputStream.read(buffer)) > 0) {
-//            Log.i(LOG_TAG,"NN = "+n);
-//fileOutputStream.write(buffer, 0, n);
-//        }
-
-       fileOutputStream.write(text.getBytes());
-
-//        ByteArrayOutputStream result = new ByteArrayOutputStream();
-//        int length;
-//        while ((length = inputStream.read(buffer)) != -1) {
-//            result.write(buffer, 0, length);
-//        }
-//
-//        Log.i(LOG_TAG, "result.toString "+ result.toString().length());
-//
-//        //
-//
-//        Log.i(LOG_TAG,"n "+n);
-
-
-        fileOutputStream.flush();
-        fileOutputStream.close();
-        inputStream.close();
-
-//        /*
-//         * Get the file's content URI from the incoming Intent,
-//         * then query the server app to get the file's display name
-//         * and size.
-//         */
-//        //Uri returnUri = returnIntent.getData();
-//        Cursor returnCursor =   getContentResolver().query(imageUri, null, null, null, null);
-//        /*
-//         * Get the column indexes of the data in the Cursor,
-//         * move to the first row in the Cursor, get the data,
-//         * and display it.
-//         */
-//
-//        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-//        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-//        returnCursor.moveToFirst();
-//
-//        Log.i(LOG_TAG,"nameIndex "+nameIndex);
-//        Log.i(LOG_TAG,"sizeIndex "+sizeIndex);
-
-//        TextView nameView = (TextView) findViewById(R.id.filename_text);
-//        TextView sizeView = (TextView) findViewById(R.id.filesize_text);
-//        nameView.setText(returnCursor.getString(nameIndex));
-//        sizeView.setText(Long.toString(returnCursor.getLong(sizeIndex)));
-
-    }
 
 // метод записи в базу
     private void addImageToDatebase(File file){

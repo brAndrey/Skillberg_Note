@@ -12,9 +12,11 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -22,29 +24,39 @@ import android.view.MenuItem;
 
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.skillberg_note.R;
 import com.example.skillberg_note.db.NotesContract;
+import com.example.skillberg_note.ui.NoteImagesAdapter;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
-//public class CreateNoteActivity<intent> extends BaseNoteActivity {
+public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
-public class CreateNoteActivity<intent> extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+//public class CreateNoteActivity<intent> extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
         static String LOG_TAG = CreateNoteActivity.class.getName();
 
     public static final String EXTRA_NOTE_ID = "note_id";
 
-    private long noteId;
+
 
     private TextInputEditText titleEt;
     private TextInputEditText textEt;
@@ -58,9 +70,11 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
 
     private File currentImageFile;
 
-//    // для выбора URI изображения из базы
-    private static final int LOADER_NOTE = 0;
-    private static final int LOADER_IMAGES = 1;
+    // для выбора URI изображения из базы
+ //   private static final int LOADER_NOTE = 0;
+ //   private static final int LOADER_IMAGES = 1;
+
+    //private long noteId;
 
 
     @Override
@@ -79,27 +93,34 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
         titleTil = findViewById(R.id.title_til);
         textTil = findViewById(R.id.text_til);
 
+        RecyclerView recyclerView = findViewById(R.id.images_rv);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        noteImagesAdapter = new NoteImagesAdapter(null);
+        recyclerView.setAdapter(noteImagesAdapter);
+
+
         // считываем входящий параметр ID корректируемой строки , если он пуст то -1
         noteId = getIntent().getLongExtra(EXTRA_NOTE_ID, -1);
 
 
         if (noteId != -1) {
 
-            getLoaderManager().initLoader(
-                    LOADER_NOTE, // Идентификатор загрузчика
-                    null, // Аргументы
-                    this // Callback для событий загрузчика
-            );
+//            getLoaderManager().initLoader(
+//                    LOADER_NOTE, // Идентификатор загрузчика
+//                    null, // Аргументы
+//                    this // Callback для событий загрузчика
+//            );
+//
+//            getLoaderManager().initLoader(
+//                    LOADER_IMAGES,
+//                    null,
+//                    this
+//            );
 
-            getLoaderManager().initLoader(
-                    LOADER_IMAGES,
-                    null,
-                    this
-            );
+            initNoteLoader();
 
-        //    initNoteLoader();
-
-        //    initImagesLoader();
+            initImagesLoader();
 
         }
 
@@ -191,7 +212,7 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 // Задаём название
                 .setTitle(R.string.title_dialog_attachment_variants)
-                // Задаём список
+                // Задаём список и листнер списка
                 .setItems(R.array.attachment_variants, new DialogInterface.OnClickListener() {
 
                     @Override
@@ -222,6 +243,7 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
 
     //lang=java
     private void takePhoto() {
+
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         //Создаём файл для изображения
@@ -245,27 +267,47 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_PICK_FROM_GALLARY && requestCode == RESULT_OK && data != null) {
+        Log.i(LOG_TAG +" onActivityResult ", "requestCode "+String.valueOf(requestCode));
+        Log.i(LOG_TAG +" onActivityResult ", "resultCode "+String.valueOf(resultCode));
+        Log.i(LOG_TAG +" onActivityResult ", "data "+String.valueOf(data));
+
+
+        if (requestCode == REQUEST_CODE_PICK_FROM_GALLARY
+                && resultCode == RESULT_OK
+                && data != null) {
 
             // ПОлучаем URI изображения
             Uri imageUri = data.getData();
+
+            Log.i(LOG_TAG +" onActivityResult ", "imageUri "+String.valueOf(imageUri));
 
             if (imageUri != null) {
                 try {
                     //ПОлучаем InputStream, из которого будем декодировать Bitmap
                     InputStream inputStream = getContentResolver().openInputStream(imageUri);
 
+                    Log.i(LOG_TAG +" onActivityResult" ,"inputStream "+inputStream );
                     //Декодируем Bitmap
                     final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    File imageFile = createImageFile();
+
+                    writeInputStreamToFile(inputStream,imageFile,imageUri);
+
+                    addImageToDatebase(imageFile);
 
                     Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
 
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 
-        } else if (requestCode == REQUEST_CODE_TAKE_PHOTO && requestCode == RESULT_OK) {
+        } else
+
+            if (requestCode == REQUEST_CODE_TAKE_PHOTO && requestCode == RESULT_OK) {
 
             Bitmap bitmap = BitmapFactory.decodeFile(currentImageFile.getAbsolutePath());
             Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
@@ -273,6 +315,91 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
         }
     }
 
+
+    private void writeInputStreamToFile(InputStream inputStream, File outFile,Uri imageUri) throws IOException {
+        /*
+         *  нам нужно скопировать изображение к себе. Для этого нам понадобится следующий метод:
+         */
+        String text = "Hello World";
+
+        FileOutputStream fileOutputStream = new FileOutputStream(outFile);
+
+        Log.i(LOG_TAG, "outFile.getName()" + outFile.getName());
+        Log.i(LOG_TAG, "outFile.getAbsolutePath() " + outFile.getAbsolutePath());
+
+        byte[] buffer = new byte[8192];
+        int n = 0;
+
+        Log.i(LOG_TAG, "inputStream " + inputStream);
+        Log.i(LOG_TAG, "inputStream.available() " + inputStream.available());
+        Log.i(LOG_TAG, " buffer.length " + buffer.length);
+
+        //http://developer.alexanderklimov.ru/android/java/inputstream.php
+//
+//        while ((n = inputStream.read(buffer)) > 0) {
+//            Log.i(LOG_TAG,"NN = "+n);
+//fileOutputStream.write(buffer, 0, n);
+//        }
+
+       fileOutputStream.write(text.getBytes());
+
+//        ByteArrayOutputStream result = new ByteArrayOutputStream();
+//        int length;
+//        while ((length = inputStream.read(buffer)) != -1) {
+//            result.write(buffer, 0, length);
+//        }
+//
+//        Log.i(LOG_TAG, "result.toString "+ result.toString().length());
+//
+//        //
+//
+//        Log.i(LOG_TAG,"n "+n);
+
+
+        fileOutputStream.flush();
+        fileOutputStream.close();
+        inputStream.close();
+
+//        /*
+//         * Get the file's content URI from the incoming Intent,
+//         * then query the server app to get the file's display name
+//         * and size.
+//         */
+//        //Uri returnUri = returnIntent.getData();
+//        Cursor returnCursor =   getContentResolver().query(imageUri, null, null, null, null);
+//        /*
+//         * Get the column indexes of the data in the Cursor,
+//         * move to the first row in the Cursor, get the data,
+//         * and display it.
+//         */
+//
+//        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+//        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+//        returnCursor.moveToFirst();
+//
+//        Log.i(LOG_TAG,"nameIndex "+nameIndex);
+//        Log.i(LOG_TAG,"sizeIndex "+sizeIndex);
+
+//        TextView nameView = (TextView) findViewById(R.id.filename_text);
+//        TextView sizeView = (TextView) findViewById(R.id.filesize_text);
+//        nameView.setText(returnCursor.getString(nameIndex));
+//        sizeView.setText(Long.toString(returnCursor.getLong(sizeIndex)));
+
+    }
+
+// метод записи в базу
+    private void addImageToDatebase(File file){
+        if (noteId == -1){
+            // На данный момент мы добавляем аттачи только в режиме редактирования
+            return;
+        }
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NotesContract.Images.COLUMN_PATH,file.getAbsolutePath());
+        contentValues.put(NotesContract.Images.COLUMN_NOTE_ID,noteId);
+
+        getContentResolver().insert(NotesContract.Images.URI,contentValues);
+    }
 
     @Nullable
     private File createImageFile() {
@@ -286,11 +413,14 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
 
         // Создаём файл
         File image = new File(storageDir, filename);
+
         try {
             if (image.createNewFile()) {
+                Log.i(LOG_TAG,"image.createNewFile() = true");
                 return image;
             }
         } catch (IOException e) {
+            Log.i(LOG_TAG,"image.createNewFile() = false");
             e.printStackTrace();
         }
         return null;
@@ -299,42 +429,42 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
     ;
 
     //**************************************************************************************
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-        if (id == LOADER_NOTE){
-            return new CursorLoader(
-                this,
-                ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
-                //NotesContract.Notes.URI+"/"+noteId,
-                NotesContract.Notes.SINGLE_PROJECTION,
-                null,
-                null,
-                null);
-
-
-    } else{
-            return new CursorLoader(
-                    this,
-                    NotesContract.Images.URI,
-                    NotesContract.Images.PROJECTION,
-                    NotesContract.Images.COLUMN_NOTE_ID + " =?",
-                    new String[]{String.valueOf(noteId)},
-                    null);
-        }
-    }
-
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if (loader.getId() == LOADER_NOTE) {
-            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-            displayNote(cursor);
-        } else {
-            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-        }
-    }
+//
+//    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//
+//        if (id == LOADER_NOTE){
+//            return new CursorLoader(
+//                this,
+//                ContentUris.withAppendedId(NotesContract.Notes.URI, noteId),//URI
+//                //NotesContract.Notes.URI+"/"+noteId,
+//                NotesContract.Notes.SINGLE_PROJECTION,
+//                null,
+//                null,
+//                null);
+//
+//
+//    } else{
+//            return new CursorLoader(
+//                    this,
+//                    NotesContract.Images.URI,
+//                    NotesContract.Images.PROJECTION,
+//                    NotesContract.Images.COLUMN_NOTE_ID + " =?",
+//                    new String[]{String.valueOf(noteId)},
+//                    null);
+//        }
+//    }
+//
+//
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+//        if (loader.getId() == LOADER_NOTE) {
+//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
+//            displayNote(cursor);
+//        } else {
+//            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
+//        }
+//    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -344,16 +474,17 @@ public class CreateNoteActivity<intent> extends AppCompatActivity implements Loa
     //@Override
     protected void displayNote(Cursor cursor) {
 
-        if (!cursor.moveToFirst()) {
-             // Если не получилось перейти к первой строке — завершаем Activity
-            finish();
+        if (cursor!=null) {
+            if (!cursor.moveToFirst() ) {
+                // Если не получилось перейти к первой строке — завершаем Activity
+                finish();
+            }
+
+            String title = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Notes.COLUMN_TITLE));
+            String noteText = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Notes.COLUMN_NOTE));
+
+            titleEt.setText(title);
+            textEt.setText(noteText);
         }
-
-        String title = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Notes.COLUMN_TITLE));
-        String noteText = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Notes.COLUMN_NOTE));
-
-        titleEt.setText(title);
-        textEt.setText(noteText);
-
     }
 }

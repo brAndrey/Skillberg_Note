@@ -21,7 +21,7 @@ public class InsertOneRecord {
 
         ContentResolver contentResolver = intContext.getContentResolver();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(NotesContract.Notes.COLUMN_TITLE, "Заголовок заметки"+ i );
+        contentValues.put(NotesContract.Notes.COLUMN_TITLE, "Заголовок заметки "+ i );
         contentValues.put(NotesContract.Notes.COLUMN_NOTE, "Текст заметки"+ i );
         contentValues.put(NotesContract.Notes.COLUMN_CREATED_TS, System.currentTimeMillis());
         contentValues.put(NotesContract.Notes.COLUMN_UPDATED_TS, System.currentTimeMillis());

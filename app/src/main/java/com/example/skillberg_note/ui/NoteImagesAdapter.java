@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,26 +22,41 @@ public class NoteImagesAdapter extends CursorRecyclerAdapter<NoteImagesAdapter.V
         super(cursor);
     }
 
-    @Override
-    public void onBindViewHolder(NoteImagesAdapter.ViewHolder viewHolder, Cursor cursor) {
-        long imageId = cursor.getLong(cursor.getColumnIndexOrThrow(NotesContract.Images._ID));
-        String imagePath = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Images.COLUMN_PATH));
-
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-
-        viewHolder.imageView.setImageBitmap(bitmap);
-        viewHolder.imageView.setTag(imageId);
-    }
-
     @NonNull
     @Override
-    public NoteImagesAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
 
         View view = layoutInflater.inflate(R.layout.view_item_note_image,parent,false);
 
         return new ViewHolder(view);
     }
+
+    @Override
+    public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+
+
+        long imageId = cursor.getLong(cursor.getColumnIndexOrThrow(NotesContract.Images._ID));
+        String imagePath = cursor.getString(cursor.getColumnIndexOrThrow(NotesContract.Images.COLUMN_PATH));
+        Log.i("NoteImagesAdapter","imageId "+imageId);
+
+        Log.i("NoteImagesAdapter","imagePath "+imagePath);
+
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+
+        Log.i("NoteImagesAdapter","bitmap "+bitmap);
+        if (bitmap != null) {
+            try {
+                viewHolder.imageView.setImageBitmap(bitmap);
+                viewHolder.imageView.setTag(imageId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {

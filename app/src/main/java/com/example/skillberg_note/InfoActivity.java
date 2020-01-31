@@ -39,7 +39,7 @@ public class InfoActivity extends AppCompatActivity {
 
         TextView textView = findViewById(R.id.textViewInfo);
 
-        String tebles = String.valueOf(NotesContract.DB_VERSION);
+        StringBuilder tebles = new StringBuilder(String.valueOf(NotesContract.DB_VERSION));
 
         NotesDBHelper  notesDBHelper = new NotesDBHelper(getBaseContext());
 
@@ -47,23 +47,23 @@ public class InfoActivity extends AppCompatActivity {
 
         final int version = db.getVersion();
 
-        tebles = tebles+" -> "+version+"\n";
+        tebles.append(" -> ").append(version).append("\n");
 
         ArrayList<Pair<String, String>> attachedDbs = new ArrayList<Pair<String, String>>();
 
         attachedDbs = (ArrayList<Pair<String, String>>) db.getAttachedDbs();//getAttachedDbs();
 
-        tebles=tebles+String.valueOf(attachedDbs.size()) + "\n";
+        tebles.append(String.valueOf(attachedDbs.size())).append("\n");
 
         for (Pair name: attachedDbs) {
-            tebles=tebles+String.valueOf(name)+"\n";
-            tebles=tebles+String.valueOf(name.first)+"\n";
-            tebles=tebles+String.valueOf(name.second)+"\n";
+            tebles.append(name).append("\n");
+            tebles.append(name.first).append("\n");
+            tebles.append(name.second).append("\n");
 
         }
 
 
-        textView.setText(tebles);
+        textView.setText(tebles.toString());
 //
 //        FloatingActionButton fab = findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {

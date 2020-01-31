@@ -6,6 +6,7 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +15,9 @@ import com.example.skillberg_note.ui.NoteImagesAdapter;
 
 
 public abstract class BaseNoteActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    String LOG_TAG=BaseNoteActivity.class.getName();
+
     // для выбора URI изображения из базы
     private static final int LOADER_NOTE = 0;
     private static final int LOADER_IMAGES = 1;
@@ -67,13 +71,14 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
         if (loader.getId() == LOADER_NOTE) {
-            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
+                cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
             displayNote(cursor);
         } else {
-            cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
 
-            noteImagesAdapter.swapCurcor(cursor);
+                cursor.setNotificationUri(getContentResolver(), NotesContract.Images.URI);
+                noteImagesAdapter.swapCurcor(cursor);
         }
     }
 

@@ -142,30 +142,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 }
 
-//    private void insert() {
-//        ContentResolver contentResolver = getContentResolver();
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(NotesContract.Notes.COLUMN_TITLE, "Заголовок заметки" );
-//        contentValues.put(NotesContract.Notes.COLUMN_NOTE, "Текст заметки");
-//        contentValues.put(NotesContract.Notes.COLUMN_CREATED_TS, System.currentTimeMillis());
-//        contentValues.put(NotesContract.Notes.COLUMN_UPDATED_TS, System.currentTimeMillis());
-
-//        Uri uri = contentResolver.insert(NotesContract.Notes.URI, contentValues);
-//        Log.i("Test", "URI: " + uri);
-//    }
-//
-//    private void select() {
-//        ContentResolver contentResolver = getContentResolver();
-//        Cursor cursor = contentResolver.query(
-//                NotesContract.Notes.URI, // URI
-//                NotesContract.Notes.LIST_PROJECTION, // Столбцы
-//                null, // Параметры выборки
-//                null, // Аргументы выборки
-//                null // Сортировка по умолчанию
-//        );
-//        Log.i("Test", "Count: " + cursor.getCount());
-//        cursor.close();
-//    }
 
 
 

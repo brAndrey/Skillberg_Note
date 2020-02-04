@@ -55,9 +55,9 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
 //public class CreateNoteActivity<intent> extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-        static String LOG_TAG = CreateNoteActivity.class.getName();
+    static String LOG_TAG = CreateNoteActivity.class.getName();
 
-        private Context context;
+    private Context context;
 
     public static final String EXTRA_NOTE_ID = "note_id";
 
@@ -72,13 +72,6 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
     private static final int REQUEST_CODE_TAKE_PHOTO = 2;
 
     private File currentImageFile;
-
-    // для выбора URI изображения из базы
- //   private static final int LOADER_NOTE = 0;
- //   private static final int LOADER_IMAGES = 1;
-
-    //private long noteId;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -267,27 +260,29 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
             // ПОлучаем URI изображения
             Uri imageUri = data.getData();
 
-            Log.i(LOG_TAG +" onActivityResult ", "imageUri "+String.valueOf(imageUri));
+            Log.i(LOG_TAG + " onActivityResult ", "imageUri " + String.valueOf(imageUri));
 
             if (imageUri != null) {
                 try {
                     //ПОлучаем InputStream, из которого будем декодировать Bitmap
                     InputStream inputStream = getContentResolver().openInputStream(imageUri);
 
-                    Log.i(LOG_TAG +" onActivityResult" ,"inputStream "+inputStream );
-                    //Декодируем Bitmap
-                  //  final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    Log.i(LOG_TAG + " onActivityResult", "inputStream " + inputStream);
 
+                    // Создаём файл
                     File imageFile = createImageFile();
 
                     // уходим в отдельный класс работы с файлами
-                    FileStream fileStream =new FileStream();
-                    fileStream.writeInputStreamToFile(inputStream,imageFile,imageUri);
+                    FileStream fileStream = new FileStream();
+                    fileStream.writeInputStreamToFile(inputStream, imageFile, imageUri);
+
+                    Log.i(LOG_TAG + " onActivityResult", "imageFile " + imageFile);
 
                     //DataBaseOperation dataBaseOperation = new DataBaseOperation(context);
-                    addImageToDatebase(imageFile);
+                    addImageToDatabase(imageFile);
 
-                 //   Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+                    Log.i(LOG_TAG, "onActivityResult getFileSizeBytes " + getFileSizeBytes(imageFile));
+
 
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -296,28 +291,34 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
                 }
             }
 
-        } else
+        } else if (requestCode == REQUEST_CODE_TAKE_PHOTO && requestCode == RESULT_OK) {
 
-            if (requestCode == REQUEST_CODE_TAKE_PHOTO && requestCode == RESULT_OK) {
+            //Bitmap bitmap = BitmapFactory.decodeFile(currentImageFile.getAbsolutePath());
+            //Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
 
-            Bitmap bitmap = BitmapFactory.decodeFile(currentImageFile.getAbsolutePath());
-            Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+             // Сохраняем изображение
+            addImageToDatabase(currentImageFile);
+
+            // На всякий случай обнуляем файл
+            currentImageFile = null;
 
         }
     }
 
     // метод записи в базу
-    public void addImageToDatebase(File file){
-        if (noteId == -1){
+    public void addImageToDatabase(File file) {
+        if (noteId == -1) {
             // На данный момент мы добавляем аттачи только в режиме редактирования
             return;
         }
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(NotesContract.Images.COLUMN_PATH,file.getAbsolutePath());
-        contentValues.put(NotesContract.Images.COLUMN_NOTE_ID,noteId);
+        contentValues.put(NotesContract.Images.COLUMN_PATH, file.getAbsolutePath());
+        contentValues.put(NotesContract.Images.COLUMN_NOTE_ID, noteId);
 
-        getContentResolver().insert(NotesContract.Images.URI,contentValues);
+        getContentResolver().insert(NotesContract.Images.URI, contentValues);
+
+        Log.i(LOG_TAG,"addImageToDatebase "+file+" "+noteId);
     }
 
     @Nullable
@@ -335,11 +336,11 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
         try {
             if (image.createNewFile()) {
-                Log.i(LOG_TAG,"image.createNewFile() = true");
+                Log.i(LOG_TAG, "image.createNewFile() = true");
                 return image;
             }
         } catch (IOException e) {
-            Log.i(LOG_TAG,"image.createNewFile() = false");
+            Log.i(LOG_TAG, "image.createNewFile() = false");
             e.printStackTrace();
         }
         return null;
@@ -349,8 +350,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
     //@Override
     protected void displayNote(Cursor cursor) {
 
-        if (cursor!=null) {
-            if (!cursor.moveToFirst() ) {
+        if (cursor != null) {
+            if (!cursor.moveToFirst()) {
                 // Если не получилось перейти к первой строке — завершаем Activity
                 finish();
             }
@@ -361,5 +362,10 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
             titleEt.setText(title);
             textEt.setText(noteText);
         }
+    }
+
+    // просто вызываем метод length() и получаем размер файла в байтах
+    public String getFileSizeBytes(File file) {
+        return file.length() + " bytes";
     }
 }

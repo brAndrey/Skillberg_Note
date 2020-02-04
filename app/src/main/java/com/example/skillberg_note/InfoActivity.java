@@ -1,6 +1,10 @@
 package com.example.skillberg_note;
 
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
@@ -13,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
@@ -20,9 +25,14 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 
-public class InfoActivity extends AppCompatActivity {
+public class InfoActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     String LOG_TAG = InfoActivity.class.getName();
+
+    // для выбора URI изображения из базы
+    private static final int LOADER_IMAGES = 1;
+
+    protected long noteId = -1;
 
     private Context context;
 
@@ -41,7 +51,7 @@ public class InfoActivity extends AppCompatActivity {
 
         StringBuilder tebles = new StringBuilder(String.valueOf(NotesContract.DB_VERSION));
 
-        NotesDBHelper  notesDBHelper = new NotesDBHelper(getBaseContext());
+        NotesDBHelper notesDBHelper = new NotesDBHelper(getBaseContext());
 
         SQLiteDatabase db = notesDBHelper.getReadableDatabase();
 
@@ -55,7 +65,7 @@ public class InfoActivity extends AppCompatActivity {
 
         tebles.append(String.valueOf(attachedDbs.size())).append("\n");
 
-        for (Pair name: attachedDbs) {
+        for (Pair name : attachedDbs) {
             tebles.append(name).append("\n");
             tebles.append(name.first).append("\n");
             tebles.append(name.second).append("\n");
@@ -64,6 +74,8 @@ public class InfoActivity extends AppCompatActivity {
 
 
         textView.setText(tebles.toString());
+
+        initImagesLoader();
 //
 //        FloatingActionButton fab = findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
@@ -76,4 +88,48 @@ public class InfoActivity extends AppCompatActivity {
     }
 
 
+    // инициализируем загрузчик изображения
+    protected void initImagesLoader() {
+        getLoaderManager().initLoader(
+                LOADER_IMAGES,
+                null,
+                this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(
+                this,
+                NotesContract.Images.URI,
+                NotesContract.Images.PROJECTION,
+                NotesContract.Images.COLUMN_NOTE_ID + " =?",
+                null,
+                null);
+//new String[]{String.valueOf(noteId)},
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.i(LOG_TAG,"  onLoadFinished "+cursor.getCount());
+        //if (cursor.moveToFirst()) {
+            int idColumnIndex = cursor.getColumnIndex(NotesContract.Images._ID);
+            int pathColumnIndex = cursor.getColumnIndex(NotesContract.Images.COLUMN_PATH);
+            int noteColumnIndex = cursor.getColumnIndex(NotesContract.Images.COLUMN_NOTE_ID);
+
+
+            //Проходим по рядам
+            while (cursor.moveToNext()) {
+                // используем индексы для получения значений как строк
+                String ID_tabs = Integer.toString(cursor.getInt(idColumnIndex));
+                String path_tabs = cursor.getString(pathColumnIndex);
+                String note_tabs = cursor.getString(noteColumnIndex);
+                Log.i(LOG_TAG, "Images: " + ID_tabs +"  "+path_tabs+ "  " + note_tabs);
+            }
+        //}
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }

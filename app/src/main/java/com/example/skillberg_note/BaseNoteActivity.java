@@ -19,7 +19,7 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
     String LOG_TAG=BaseNoteActivity.class.getName();
 
     // для выбора URI изображения из базы
-    private static final int LOADER_NOTE = 0;
+    private static final int LOADER_NOTE = 0; // берем заметки
     private static final int LOADER_IMAGES = 1;
 
     protected long noteId = -1;

@@ -9,6 +9,10 @@ public class DataBaseOperation {
 
     Context intContext;
 
+    // для выбора URI изображения из базы
+    private static final int LOADER_NOTE = 0;
+    private static final int LOADER_IMAGES = 1;
+
 
 
     public DataBaseOperation(Context intContext){
@@ -28,5 +32,10 @@ public class DataBaseOperation {
         contentValues.put(NotesContract.Images.COLUMN_NOTE_ID,noteId);
 
         intContext.getContentResolver().insert(NotesContract.Images.URI,contentValues);
+    }
+
+    public void OutImageTabl(){
+
+
     }
 }

@@ -46,8 +46,10 @@ public abstract class CursorRecyclerAdapter<ViewHolder extends RecyclerView.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
 
+        // Если данные некорректны — кидаем исключение
         if (!isDataValid){throw new IllegalStateException("Cursor is not valid");}
 
+        // Попробовали перейти к определённой строке, но это не получилось
         if (!cursor.moveToPosition(position)){
             throw  new IllegalStateException("Can not move to positin" + position);
         }

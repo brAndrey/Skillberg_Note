@@ -40,11 +40,11 @@ public class NoteImagesAdapter extends CursorRecyclerAdapter<NoteImagesAdapter.V
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
 
-        Time currentTime = new Time();
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HH-mm-ss");
         String currentDateandTime = sdf.format(new Date());
-
         Log.i("NoteImagesAdapter"," Time "+currentDateandTime);
+
 
         long imageId = cursor.getLong(cursor.getColumnIndexOrThrow(NotesContract.Images._ID));
 
@@ -71,8 +71,6 @@ public class NoteImagesAdapter extends CursorRecyclerAdapter<NoteImagesAdapter.V
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView;
-
-
 
         }
     }

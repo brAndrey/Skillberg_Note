@@ -49,6 +49,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class CreateNoteActivity<intent> extends BaseNoteActivity {
@@ -72,6 +74,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
     private static final int REQUEST_CODE_TAKE_PHOTO = 2;
 
     private File currentImageFile;
+
+    private List scoreList = new ArrayList();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -256,6 +260,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
         if (requestCode == REQUEST_CODE_PICK_FROM_GALLARY
                 && resultCode == RESULT_OK
                 && data != null) {
+            // получили изображение из галереи
 
             // ПОлучаем URI изображения
             Uri imageUri = data.getData();
@@ -282,6 +287,11 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
                     addImageToDatabase(imageFile);
 
                     Log.i(LOG_TAG, "onActivityResult getFileSizeBytes " + getFileSizeBytes(imageFile));
+
+
+                    //viewHolder.itemView.setTag(imageId);
+
+                    //viewHolder.imageView.setImageBitmap(bitmap);
 
 
                 } catch (FileNotFoundException e) {
@@ -323,6 +333,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
     @Nullable
     private File createImageFile() {
+
         //Генерируем имя файла
         String filename = System.currentTimeMillis() + ".jpg";
 

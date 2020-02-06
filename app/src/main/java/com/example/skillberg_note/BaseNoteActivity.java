@@ -84,6 +84,7 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
         if (cursor==null){finish();}
 
         if (loader.getId() == LOADER_NOTE) {
+            //если заголовок и текст заметки
             try {
                 cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
                 displayNote(cursor);
@@ -92,7 +93,7 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
             }
 
         } else {
-
+               // если упоминания о файлах
                 cursor.setNotificationUri(getContentResolver(), NotesContract.Images.URI);
 
                 try {
@@ -100,6 +101,7 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
 
         }
     }

@@ -184,7 +184,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
                         null);
             }
 
-            finish();
+         //   finish();
         }
     }
 
@@ -228,8 +228,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        //Создаём файл для изображения
-        currentImageFile = createImageFile();
+        // Создаём файл
+        File imageFile = createImageFile();
 
         if (currentImageFile != null) {
             //Если файл создался - получаем его URI
@@ -268,12 +268,12 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
                     InputStream inputStream = getContentResolver().openInputStream(imageUri);
 
                     Log.i(LOG_TAG + " onActivityResult", "inputStream " + inputStream);
-
-                    // Создаём файл
+                     // Создаём файл
                     File imageFile = createImageFile();
 
                     // уходим в отдельный класс работы с файлами
                     FileStream fileStream = new FileStream();
+
                     fileStream.writeInputStreamToFile(inputStream, imageFile, imageUri);
 
                     Log.i(LOG_TAG + " onActivityResult", "imageFile " + imageFile);

@@ -22,6 +22,8 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
     private static final int LOADER_NOTE = 0; // берем заметки
     private static final int LOADER_IMAGES = 1;
 
+    public static final String EXTRA_NOTE_ID = "note_id";
+
     protected long noteId = -1;
 
     protected NoteImagesAdapter noteImagesAdapter;
@@ -46,6 +48,13 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        noteId = getIntent().getLongExtra(EXTRA_NOTE_ID, -1);
+        Log.i("Loader<Cursor>","noteId "+noteId);
+        Log.i("Loader<Cursor>"," "+NotesContract.Notes.URI);
+        Log.i("Loader<Cursor>"," "+ContentUris.withAppendedId(NotesContract.Notes.URI, noteId));
+        Log.i("Loader<Cursor>"," "+NotesContract.Notes.SINGLE_PROJECTION);
+        String[]ar={String.valueOf(noteId)};
+        Log.i("Loader<Cursor>"," "+ArreyToString(ar));
         if (id == LOADER_NOTE) {
             return new CursorLoader(
                     this,
@@ -72,13 +81,26 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 
+        if (cursor==null){finish();}
+
         if (loader.getId() == LOADER_NOTE) {
+            try {
                 cursor.setNotificationUri(getContentResolver(), NotesContract.Notes.URI);
-            displayNote(cursor);
+                displayNote(cursor);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         } else {
 
                 cursor.setNotificationUri(getContentResolver(), NotesContract.Images.URI);
-                noteImagesAdapter.swapCurcor(cursor);
+
+                try {
+                    noteImagesAdapter.swapCurcor(cursor);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
         }
     }
 
@@ -90,6 +112,13 @@ public abstract class BaseNoteActivity extends AppCompatActivity implements Load
     // Отображаем заметку. Этот метод должен быть реализован в Activity
     protected abstract void displayNote(Cursor cursor);
 
+    private String ArreyToString(String[] arrey) {
+        String rez = "";
+        for (String num : arrey) {
+            rez = rez + " " + num;
+        }
+        return rez;
+    }
 
 }
 

@@ -58,6 +58,8 @@ public class NotesProvider extends ContentProvider {
         Log.i(LOG_TAG+" query "," "+uri);
         Log.i(LOG_TAG+" URI_MATCHER "," "+URI_MATCHER.match(uri));
         Log.i(LOG_TAG+" projection "," "+ArreyToString(projection));
+        Log.i(LOG_TAG,"**************************************************");
+
         SQLiteDatabase db = notesDBHelper.getReadableDatabase();
         switch (URI_MATCHER.match(uri)) {
             case NOTES:
@@ -114,7 +116,9 @@ public class NotesProvider extends ContentProvider {
                         sortOrder);
 
             case IMAGES:
-                if (TextUtils.isEmpty(sortOrder)){sortOrder = NotesContract.Images._ID + " ASC";}
+                Log.i(LOG_TAG + " switch  ","IMAGES s s");
+                if (TextUtils.isEmpty(sortOrder)){
+                    sortOrder = NotesContract.Images._ID + " ASC";}
 
                 return db.query(NotesContract.Images.TABLE_NAME,
                         projection,

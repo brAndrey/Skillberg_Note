@@ -9,6 +9,8 @@ import android.widget.Toast;
 import android.provider.OpenableColumns;
 
 
+import androidx.annotation.Nullable;
+
 import com.example.skillberg_note.R;
 
 import java.io.BufferedReader;
@@ -86,7 +88,6 @@ public class FileStream {
         /*
          *  нам нужно скопировать изображение к себе. Для этого нам понадобится следующий метод:
          */
-
         FileOutputStream fileOutputStream = new FileOutputStream(outFile);
 
 //        Log.i(LOG_TAG, "outFile.getName()" + outFile.getName());
@@ -95,13 +96,9 @@ public class FileStream {
         byte[] buffer = new byte[8192];
         int n = 0;
 
-//        Log.i(LOG_TAG, "inputStream " + inputStream);
-//        Log.i(LOG_TAG, "inputStream.available() " + inputStream.available());
-
         //http://developer.alexanderklimov.ru/android/java/inputstream.php
-//
+
         while ((n = inputStream.read(buffer)) > 0) {
-            Log.i(LOG_TAG,"NN = "+n);
             fileOutputStream.write(buffer, 0, n);
         }
 
@@ -114,4 +111,30 @@ public class FileStream {
         * */
     }
 
-  }
+    @Nullable
+    public File createImageFile(Context context) {
+        //Генерируем имя файла
+        String filename = System.currentTimeMillis() + ".jpg";
+
+        // Получаем приватную директорию на карте памяти для хранения изображений
+        // Выглядит она примерно так: /sdcard/Android/data/com.skillberg.notes/files/Pictures
+        // Директория будет создана автоматически, если ещё не существует
+        File storageDir =  context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        // Создаём файл
+        File image = new File(storageDir, filename);
+
+        try {
+            if (image.createNewFile()) {
+                Log.i(LOG_TAG, "image.createNewFile() = true");
+                return image;
+            }
+        } catch (IOException e) {
+            Log.i(LOG_TAG, "image.createNewFile() = false");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+}

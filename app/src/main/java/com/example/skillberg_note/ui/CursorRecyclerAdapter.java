@@ -2,15 +2,20 @@ package com.example.skillberg_note.ui;
 
 
 import android.database.Cursor;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.skillberg_note.db.NotesContract;
 
-public abstract class CursorRecyclerAdapter<ViewHolder extends RecyclerView.ViewHolder>
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-    extends RecyclerView.Adapter<ViewHolder> {
+public abstract class CursorRecyclerAdapter<ViewHolder extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<ViewHolder> {
+
+
+    static String LOG_TAG = CursorRecyclerAdapter.class.getName();
 
     protected Cursor cursor;
 
@@ -45,6 +50,8 @@ public abstract class CursorRecyclerAdapter<ViewHolder extends RecyclerView.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
+
+        Log.i(LOG_TAG, "onBindViewHolder Time "+currentDateandTime());
 
         // Если данные некорректны — кидаем исключение
         if (!isDataValid){throw new IllegalStateException("Cursor is not valid");}
@@ -92,6 +99,10 @@ public abstract class CursorRecyclerAdapter<ViewHolder extends RecyclerView.View
 
     }
 
-
+    private String currentDateandTime(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HH-mm-ss");
+        String currentDateandTime = sdf.format(new Date());
+        return currentDateandTime;
+    }
 
 }

@@ -22,6 +22,8 @@ import java.util.Date;
 
 public class NoteImagesAdapter extends CursorRecyclerAdapter<NoteImagesAdapter.ViewHolder> {
 
+    static String LOG_TAG = NoteImagesAdapter.class.getName();
+
     public NoteImagesAdapter(Cursor cursor) {
         super(cursor);
     }
@@ -29,6 +31,8 @@ public class NoteImagesAdapter extends CursorRecyclerAdapter<NoteImagesAdapter.V
 
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        Log.i(LOG_TAG,"onCreateViewHolder Time "+currentDateandTime());
 
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
 
@@ -40,10 +44,7 @@ public class NoteImagesAdapter extends CursorRecyclerAdapter<NoteImagesAdapter.V
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
 
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HH-mm-ss");
-        String currentDateandTime = sdf.format(new Date());
-        Log.i("NoteImagesAdapter"," Time "+currentDateandTime);
+        Log.i(LOG_TAG, "onBindViewHolder Time "+currentDateandTime());
 
 
         long imageId = cursor.getLong(cursor.getColumnIndexOrThrow(NotesContract.Images._ID));
@@ -74,6 +75,12 @@ public class NoteImagesAdapter extends CursorRecyclerAdapter<NoteImagesAdapter.V
 
         }
     }
+private String currentDateandTime(){
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HH-mm-ss");
+    String currentDateandTime = sdf.format(new Date());
+        return currentDateandTime;
+}
+
 
 
 }

@@ -215,10 +215,13 @@ public class NotesProvider extends ContentProvider {
                 String imageId = uri.getLastPathSegment();
 
                 if (TextUtils.isEmpty(selection)){
+
                     selection=NotesContract.Images._ID + " =?";
                     selectionArgs=new String[]{imageId};
+
                 }else {
                     selection = selection + " AND "+NotesContract.Images._ID + " =?";
+
                     String[] newSelectionArgs = new String[selectionArgs.length + 1];
                     System.arraycopy(selectionArgs,0,newSelectionArgs,0 ,selectionArgs.length);
                     newSelectionArgs[newSelectionArgs.length-1]=imageId;

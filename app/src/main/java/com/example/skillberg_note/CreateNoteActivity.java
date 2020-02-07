@@ -147,6 +147,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
         boolean isCorrect = true;
 
+        // блок проверки заполненности полей
         if (TextUtils.isEmpty(title)) {
             isCorrect = false;
 
@@ -164,6 +165,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
         } else {
             textTil.setErrorEnabled(false);
         }
+        // блок проверки заполненности полей END
 
         if (isCorrect) {
             long currentTime = System.currentTimeMillis();
@@ -278,16 +280,23 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
                     // уходим в отдельный класс работы с файлами
                     FileStream fileStream = new FileStream();
-
+                    // заносим данные в файл
                     fileStream.writeInputStreamToFile(inputStream, imageFile, imageUri);
+
+                    // сюда надо встроить проверку, а создался ли файл
 
                     Log.i(LOG_TAG + " onActivityResult", "imageFile " + imageFile);
 
                     //DataBaseOperation dataBaseOperation = new DataBaseOperation(context);
+                    // добавляем файл в базу
                     addImageToDatabase(imageFile);
 
                     Log.i(LOG_TAG, "onActivityResult getFileSizeBytes " + getFileSizeBytes(imageFile));
 
+                    // начинаем отрабытывать раздел на добавление
+                    scoreList.add(String.valueOf(imageFile));
+
+                    Log.i(LOG_TAG, "onActivityResult scoreList " + ArreyToString(scoreList));
 
                     //viewHolder.itemView.setTag(imageId);
 
@@ -317,6 +326,10 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
     // метод записи в базу
     public void addImageToDatabase(File file) {
+        // в этом методе тупо добавляем изображение в базу
+        // нужно реализовать алгоритм удаления пустых записей о файлах о базе
+        ******
+
         if (noteId == -1) {
             // На данный момент мы добавляем аттачи только в режиме редактирования
             return;
@@ -379,4 +392,21 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
     public String getFileSizeBytes(File file) {
         return file.length() + " bytes";
     }
+
+    private String ArreyToString(String[] arrey) {
+        String rez = "";
+        for (String num : arrey) {
+            rez = rez + " " + num;
+        }
+        return rez;
+    }
+
+    private String ArreyToString(List arrey) {
+        String rez = "";
+        for (Object num:  arrey) {
+            rez = rez + " " + num;
+        }
+        return rez;
+    }
 }
+

@@ -9,7 +9,9 @@ import android.widget.Toast;
 import android.provider.OpenableColumns;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.example.skillberg_note.R;
 
@@ -21,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class FileStream {
 
@@ -28,6 +31,16 @@ public class FileStream {
 
     private static final String fileName = "hello.txt";
     private static final String text = "Hello World";
+
+    private Context intContext;
+
+    private Context intBaseContext;
+
+
+    public FileStream (Context intContext,Context intBaseContext){
+        this.intContext = intContext;
+        this.intBaseContext = intBaseContext;
+    }
 
 
     public void writeFile() {
@@ -112,17 +125,26 @@ public class FileStream {
     }
 
     @Nullable
-    public File createImageFile(Context context) {
+    public File createImageFile() {
         //Генерируем имя файла
         String filename = System.currentTimeMillis() + ".jpg";
+        File image=null;
 
         // Получаем приватную директорию на карте памяти для хранения изображений
         // Выглядит она примерно так: /sdcard/Android/data/com.skillberg.notes/files/Pictures
         // Директория будет создана автоматически, если ещё не существует
-        File storageDir =  context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        try {
 
-        // Создаём файл
-        File image = new File(storageDir, filename);
+            File storageDir = intBaseContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            // Создаём файл
+            image = new File(storageDir, filename);
+           //image = new File(storageDir, tipeContext+".txt");
+            Log.i(LOG_TAG," storageDir "+storageDir+"/"+filename);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i(LOG_TAG," NO create file");
+        }
 
         try {
             if (image.createNewFile()) {
@@ -137,4 +159,63 @@ public class FileStream {
     }
 
 
+
+    // метод возвращает размер файла в мегабайтах
+    // длину файла делим на 1 мегабайт (1024 * 1024 байт) и узнаем количество мегабайт
+    public String getFileSizeMegaBytes(File file) {
+        return (double) file.length()/(1024*1024)+" mb";
+    }
+
+    // метод возвращает размер файла в килобайтах
+    // длину файла делим на 1 килобайт (1024 байт) и узнаем количество килобайт
+    public String getFileSizeKiloBytes(File file) {
+        return (double) file.length()/1024 + " kb";
+    }
+
+    // просто вызываем метод length() и получаем размер файла в байтах
+    public String getFileSizeBytes(File file) {
+        return file.length() + " bytes";
+    }
+    //}
+
+    // просто вызываем метод length() и получаем размер файла в байтах
+    public int getFileSizeBytesInt(File file) {
+        return (int) file.length();
+    }
+
+    private String ArreyToString(String[] arrey) {
+        String rez = "";
+        for (String num : arrey) {
+            rez = rez + " " + num;
+        }
+        return rez;
+    }
+
+    private String ArreyToString(List arrey) {
+        String rez = "";
+        for (Object num:  arrey) {
+            rez = rez + " " + num;
+        }
+        return rez;
+    }
+
 }
+
+
+
+//        try {
+//            File[] roots = ContextCompat.getExternalFilesDirs(intContext, null);
+//            if (roots != null) {
+//                for (File root : roots) {
+//                    if (root != null) {
+//                        Log.i(LOG_TAG, " ContextCompat "+root);
+//                    }
+//                }
+//            }
+//        }
+//
+//        catch (Exception e)
+//        {
+//            Log.i(LOG_TAG, " ContextCompat не прокатил");
+//            e.printStackTrace();
+//        }

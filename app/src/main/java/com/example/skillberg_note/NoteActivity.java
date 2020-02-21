@@ -71,7 +71,7 @@ public class NoteActivity extends BaseNoteActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
 
-        noteImagesAdapter = new NoteImagesAdapter(null);
+        noteImagesAdapter = new NoteImagesAdapter(null,null);
         recyclerView.setAdapter(noteImagesAdapter);
 
         if (noteId != -1) {

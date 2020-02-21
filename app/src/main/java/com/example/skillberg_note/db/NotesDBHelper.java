@@ -31,12 +31,7 @@ public class NotesDBHelper extends SQLiteOpenHelper {
 
             }
 //            ;
-
-
         }
     }
 
-//    public String getDatabaseName() {
-//        return null;
-//    }
 }

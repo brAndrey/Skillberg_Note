@@ -18,4 +18,9 @@
     </string-array>
     <string name="title_activity_info">InfoActivity</string>
 
+
+    <string name="title_btn_yas">Да</string>
+    <string name="messege_dalete_image">Удалить изображение?</string>
+    <string name="title_btn_no">Нет</string>
+
 </resources>

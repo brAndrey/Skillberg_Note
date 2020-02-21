@@ -51,7 +51,7 @@ public class InfoActivity extends AppCompatActivity implements LoaderManager.Loa
 
         StringBuilder tebles = new StringBuilder(String.valueOf(NotesContract.DB_VERSION));
 
-        NotesDBHelper notesDBHelper = new NotesDBHelper(getBaseContext());
+        NotesDBHelper notesDBHelper = new NotesDBHelper(context);
 
         SQLiteDatabase db = notesDBHelper.getReadableDatabase();
 

@@ -77,6 +77,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
     private List scoreList = new ArrayList();
 
+    private FileStream fileStream;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +98,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
         RecyclerView recyclerView = findViewById(R.id.images_rv);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        noteImagesAdapter = new NoteImagesAdapter(null);
+        noteImagesAdapter = new NoteImagesAdapter(null, onNoteImageLongClickListener);
         recyclerView.setAdapter(noteImagesAdapter);
 
         // считываем входящий параметр ID корректируемой строки , если он пуст то -1
@@ -111,8 +113,52 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
         }
 
+        //****************************************** при финише стереть
+        // уходим в отдельный класс работы с файлами
+        // в него приходится передавать 2 контекста т.к. одного не достаточно, а как
+        //один превратить в другой Я пока не умею 19.02.2020
+        // getApplicationContext() , getContext() , getBaseContext() или this
+
+        fileStream = new FileStream(context,getBaseContext());
+
+
+
+
+
+
+
+
+        //*****************
+
     }
 
+    //*************************************************************
+    private final NoteImagesAdapter.OnNoteImageLongClickListener onNoteImageLongClickListener =
+            new NoteImagesAdapter.OnNoteImageLongClickListener() {
+                @Override
+                public void onImageLongClick(final long imageId) {
+                    AlertDialog alertDialog = new AlertDialog.Builder(CreateNoteActivity.this).setMessage(R.string.messege_dalete_image)
+                            .setPositiveButton(R.string.title_btn_yas, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteImage(imageId);
+                                }
+                            }).setNegativeButton(R.string.title_btn_no, null).create();
+
+                    if (!isFinishing()) {
+                        alertDialog.show();
+                    }
+                }
+            };
+
+private void deleteImage (long imageId){
+    Log.i(LOG_TAG+" deleteImage ","imageId =" + imageId);
+    getContentResolver().delete(ContentUris.withAppendedId(NotesContract.Images.URI,imageId),
+    null,
+    null);
+}
+
+    //*************************************************************
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -219,6 +265,7 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
     }
 
+    // берём картинку из галереи
     private void pickImageFromGallery() {
 
         Intent intent = new Intent(Intent.ACTION_PICK);
@@ -232,38 +279,49 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
     //lang=java
     private void takePhoto() {
 
+
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         // Создаём файл
-        File imageFile = createImageFile();
+        currentImageFile = fileStream.createImageFile();
+
+        Log.i(LOG_TAG+" takePhoto", " currentImageFile " + currentImageFile);
 
         if (currentImageFile != null) {
             //Если файл создался - получаем его URI
-            Uri imageUri = FileProvider.getUriForFile(this,
-                    "com.example.skillberg_note.fileprovider",
-                    currentImageFile);
+            Uri imageUri = FileProvider.getUriForFile(this,"com.example.skillberg_note.fileprovider",currentImageFile);
+
+            Log.i(LOG_TAG+" takePhoto", " imageUri " + imageUri);
 
             //Передаём URI в камеру
             intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 
             startActivityForResult(intent, REQUEST_CODE_TAKE_PHOTO);
+
+
         }
+
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+/*
+  private static final int REQUEST_CODE_PICK_FROM_GALLARY = 1;
+  private static final int REQUEST_CODE_TAKE_PHOTO = 2;
 
-//        Log.i(LOG_TAG +" onActivityResult ", "requestCode "+String.valueOf(requestCode));
-//        Log.i(LOG_TAG +" onActivityResult ", "resultCode "+String.valueOf(resultCode));
-//        Log.i(LOG_TAG +" onActivityResult ", "data "+String.valueOf(data));
+  public static final int RESULT_OK           = -1;
+ */
+        Log.i(LOG_TAG +" onActivityResult ", "requestCode "+String.valueOf(requestCode));
+        Log.i(LOG_TAG +" onActivityResult ", "resultCode "+String.valueOf(resultCode));
+        Log.i(LOG_TAG +" onActivityResult ", "data "+String.valueOf(data));
 
         if (requestCode == REQUEST_CODE_PICK_FROM_GALLARY
                 && resultCode == RESULT_OK
                 && data != null) {
             // получили изображение из галереи
-
+            Log.i(LOG_TAG + " onActivityResult "," REQUEST_CODE_PICK_FROM_GALLARY ");
             // ПОлучаем URI изображения
             Uri imageUri = data.getData();
 
@@ -275,33 +333,24 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
                     InputStream inputStream = getContentResolver().openInputStream(imageUri);
 
                     Log.i(LOG_TAG + " onActivityResult", "inputStream " + inputStream);
-                     // Создаём файл
-                    File imageFile = createImageFile();
 
-                    // уходим в отдельный класс работы с файлами
-                    FileStream fileStream = new FileStream();
+                    //File imageFile = createImageFile(); // былое
+
+                    // Создаём файл
+                    File imageFile = fileStream.createImageFile();
                     // заносим данные в файл
                     fileStream.writeInputStreamToFile(inputStream, imageFile, imageUri);
 
-                    // сюда надо встроить проверку, а создался ли файл
-
+                    Log.i(LOG_TAG + " onActivityResult","FileSize  "+ fileStream.getFileSizeBytes(imageFile));
                     Log.i(LOG_TAG + " onActivityResult", "imageFile " + imageFile);
 
-                    //DataBaseOperation dataBaseOperation = new DataBaseOperation(context);
                     // добавляем файл в базу
                     addImageToDatabase(imageFile);
 
-                    Log.i(LOG_TAG, "onActivityResult getFileSizeBytes " + getFileSizeBytes(imageFile));
-
+                    //--------------------------------
                     // начинаем отрабытывать раздел на добавление
-                    scoreList.add(String.valueOf(imageFile));
-
+                   scoreList.add(String.valueOf(imageFile));
                     Log.i(LOG_TAG, "onActivityResult scoreList " + ArreyToString(scoreList));
-
-                    //viewHolder.itemView.setTag(imageId);
-
-                    //viewHolder.imageView.setImageBitmap(bitmap);
-
 
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -310,27 +359,40 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
                 }
             }
 
-        } else if (requestCode == REQUEST_CODE_TAKE_PHOTO && requestCode == RESULT_OK) {
+        } else
+            if (requestCode == REQUEST_CODE_TAKE_PHOTO && resultCode == RESULT_OK) {
 
-            //Bitmap bitmap = BitmapFactory.decodeFile(currentImageFile.getAbsolutePath());
-            //Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+            // уходим в получение снимка с камеры
+            Log.i(LOG_TAG,"onActivityResult REQUEST_CODE_TAKE_PHOTO ");
 
-             // Сохраняем изображение
+            Log.i(LOG_TAG, "onActivityResult currentImageFile " + currentImageFile);
+
+//            Bitmap bitmap = BitmapFactory.decodeFile(currentImageFile.getAbsolutePath());
+//            Log.i("Test", "Bitmap size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+
+            // Сохраняем изображение
             addImageToDatabase(currentImageFile);
 
             // На всякий случай обнуляем файл
             currentImageFile = null;
 
         }
-    }
+    } //onActivityResult
 
     // метод записи в базу
     public void addImageToDatabase(File file) {
         // в этом методе тупо добавляем изображение в базу
         // нужно реализовать алгоритм удаления пустых записей о файлах о базе
-        ******
+        //******
+        Log.i(LOG_TAG+" addImageToDatabase","файл "+file);
+
+        if (fileStream.getFileSizeBytesInt(file) == 0) {
+            Log.i(LOG_TAG+" addImageToDatabase","файл "+file+" имеет 0 размер, удаляем его ");
+            file.delete();
+            return;}
 
         if (noteId == -1) {
+            Log.i(LOG_TAG+" addImageToDatabase"," noteId == -1");
             // На данный момент мы добавляем аттачи только в режиме редактирования
             return;
         }
@@ -341,35 +403,8 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
 
         getContentResolver().insert(NotesContract.Images.URI, contentValues);
 
-        Log.i(LOG_TAG,"addImageToDatebase "+file+" "+noteId);
+        Log.i(LOG_TAG+" addImageToDatebase ",""+file+" "+noteId);
     }
-
-    @Nullable
-    private File createImageFile() {
-
-        //Генерируем имя файла
-        String filename = System.currentTimeMillis() + ".jpg";
-
-        // Получаем приватную директорию на карте памяти для хранения изображений
-        // Выглядит она примерно так: /sdcard/Android/data/com.skillberg.notes/files/Pictures
-        // Директория будет создана автоматически, если ещё не существует
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        // Создаём файл
-        File image = new File(storageDir, filename);
-
-        try {
-            if (image.createNewFile()) {
-                Log.i(LOG_TAG, "image.createNewFile() = true");
-                return image;
-            }
-        } catch (IOException e) {
-            Log.i(LOG_TAG, "image.createNewFile() = false");
-            e.printStackTrace();
-        }
-        return null;
-    }
-
 
     //@Override
     protected void displayNote(Cursor cursor) {
@@ -386,11 +421,6 @@ public class CreateNoteActivity<intent> extends BaseNoteActivity {
             titleEt.setText(title);
             textEt.setText(noteText);
         }
-    }
-
-    // просто вызываем метод length() и получаем размер файла в байтах
-    public String getFileSizeBytes(File file) {
-        return file.length() + " bytes";
     }
 
     private String ArreyToString(String[] arrey) {
